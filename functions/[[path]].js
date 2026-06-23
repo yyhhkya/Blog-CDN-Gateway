@@ -1,29 +1,29 @@
 const DEFAULT_CONFIG = {
 	// CDN 测速地址，格式为 "访问地址#显示名称"。
 	URLS: [
-		'https://blog.cmliussss.com#Ali CDN',
-		'https://fastly.blog.cmliussss.com#Fastly CDN',
-		'https://vercel.blog.cmliussss.com#Vercel CDN',
-		'https://netlify.blog.cmliussss.com#Netlify CDN'
+		'https://cf.blog.isyyo.com#CF CDN',
+		'https://eo.blog.isyyo.com#EO CDN',
+		'https://vercel.blog.isyyo.com#Vercel CDN',
+		'https://netlify.blog.isyyo.com#Netlify CDN'
 	],
 	// /ads.txt 返回内容。
-	ADS: 'google.com, pub-9350003957494520, DIRECT, f08c47fec0942fa0',
+	// ADS: 'google.com, pub-9350003957494520, DIRECT, f08c47fec0942fa0',
 	// 网站图标，同时用于响应 /favicon.ico。
-	ICO: 'https://raw.cmliussss.com/favicon.ico',
+	ICO: 'https://eo.blog.isyyo.com/favicon/icon.png',
 	// 页面中间显示的头像或 Logo。
-	PNG: 'https://raw.cmliussss.com/IMG_0038.png',
+	PNG: 'https://eo.blog.isyyo.com/favicon/logo.png',
 	// 背景图片，填写多张时会随机展示一张；留空则使用内置默认背景。
 	IMG: [
 		//'https://raw.cmliussss.com/keqing1080p.jpg'
 	],
 	// 命中首个返回 200 的线路后，等待多少毫秒再跳转。
-	JUMP_DELAY: 999,
+	JUMP_DELAY: 5000,
 	// 页脚内容，可以写备案号、统计代码或项目链接。
-	BEIAN: `由 <a href="https://github.com/cmliu/Blog-CDN-Gateway" target="_blank" rel="noopener noreferrer">Blog-CDN-Gateway</a> 强力驱动`,
+	BEIAN: `由 <a href="https://github.com/yyhhkya/Blog-CDN-Gateway" target="_blank" rel="noopener noreferrer">Blog-CDN-Gateway</a> 强力驱动`,
 	// 页面主标题。
 	TITLE: 'BlogCDN 智能路由',
 	// 浏览器标题栏中显示的站点名称。
-	NAME: 'CMLiussss Blog'
+	NAME: 'Wer Blog'
 };
 
 export async function onRequest(context) {
