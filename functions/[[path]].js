@@ -17,7 +17,7 @@ const DEFAULT_CONFIG = {
 		//'https://raw.cmliussss.com/keqing1080p.jpg'
 	],
 	// 命中首个返回 200 的线路后，等待多少毫秒再跳转。
-	JUMP_DELAY: 5000,
+	JUMP_DELAY: 999,
 	// 页脚内容，可以写备案号、统计代码或项目链接。
 	BEIAN: `由 <a href="https://github.com/yyhhkya/Blog-CDN-Gateway" target="_blank" rel="noopener noreferrer">Blog-CDN-Gateway</a> 强力驱动`,
 	// 页面主标题。
