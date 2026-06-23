@@ -57,13 +57,7 @@ async function handleRequest(request, env = {}) {
 	}
 
 	if (path.toLowerCase() === '/favicon.ico') {
-		const response = await fetch(config.ICO);
-		return new Response(response.body, {
-			headers: {
-				...response.headers,
-				...cors
-			}
-		});
+		return Response.redirect(config.ICO, 302);
 	}
 
 	// 测速用的 HEAD 请求只需返回带 CORS 头的空响应，无需生成完整 HTML。
