@@ -765,6 +765,7 @@ function generateHtml(urls, img, icon, avatar, beian, title, siteName, jumpDelay
 			try {
 				const response = await fetch(url, {
 					method: 'HEAD',
+					mode: 'no-cors',
 					signal: controller.signal,
 					cache: 'no-store',
 					redirect: 'follow'
@@ -773,10 +774,11 @@ function generateHtml(urls, img, icon, avatar, beian, title, siteName, jumpDelay
 				clearTimeout(timeoutId);
 				const latency = Date.now() - start;
 
+				// no-cors 模式下响应为 opaque，无法读取 status，只要请求成功即视为线路可达
 				return {
 					latency,
-					ok: response.status === 200,
-					status: response.status
+					ok: true,
+					status: 200
 				};
 			} catch (error) {
 				clearTimeout(timeoutId);
@@ -835,7 +837,7 @@ function generateHtml(urls, img, icon, avatar, beian, title, siteName, jumpDelay
 				}
 
 				if (!hasWinner && pendingCount === 0) {
-					document.querySelector('.subtitle').textContent = '所有线路均未返回 200';
+					document.querySelector('.subtitle').textContent = '所有线路均不可达';
 					document.querySelector('.subtitle').classList.add('is-error');
 					document.querySelector('.summary-badge').classList.add('error');
 					document.querySelector('.summary-label').textContent = '检测失败';
