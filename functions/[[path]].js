@@ -41,17 +41,39 @@ async function handleRequest(request, env = {}) {
 	const url = new URL(request.url);
 	const path = url.pathname;
 	const params = url.search;
+	const cors = corsHeaders();
+
+	if (request.method === 'OPTIONS') {
+		return new Response(null, { headers: cors });
+	}
 
 	if (path.toLowerCase() === '/ads.txt') {
 		return new Response(config.ADS, {
 			headers: {
-				'content-type': 'text/plain;charset=UTF-8'
+				'content-type': 'text/plain;charset=UTF-8',
+				...cors
 			}
 		});
 	}
 
 	if (path.toLowerCase() === '/favicon.ico') {
-		return fetch(config.ICO);
+		const response = await fetch(config.ICO);
+		return new Response(response.body, {
+			headers: {
+				...response.headers,
+				...cors
+			}
+		});
+	}
+
+	// 测速用的 HEAD 请求只需返回带 CORS 头的空响应，无需生成完整 HTML。
+	if (request.method === 'HEAD') {
+		return new Response(null, {
+			headers: {
+				'content-type': 'text/html;charset=UTF-8',
+				...cors
+			}
+		});
 	}
 
 	const urls = toList(config.URLS);
@@ -74,8 +96,20 @@ async function handleRequest(request, env = {}) {
 	);
 
 	return new Response(html, {
-		headers: { 'content-type': 'text/html;charset=UTF-8' }
+		headers: {
+			'content-type': 'text/html;charset=UTF-8',
+			...cors
+		}
 	});
+}
+
+function corsHeaders() {
+	return {
+		'Access-Control-Allow-Origin': '*',
+		'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+		'Access-Control-Allow-Headers': '*',
+		'Access-Control-Max-Age': '86400'
+	};
 }
 
 function resolveConfig(env = {}) {
