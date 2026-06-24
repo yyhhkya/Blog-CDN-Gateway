@@ -6,6 +6,9 @@ const DEFAULT_CONFIG = {
 		'https://vercel.blog.isyyo.com#Vercel CDN',
 		'https://netlify.blog.isyyo.com#Netlify CDN'
 	],
+	// 爬虫请求反代到哪个 CDN（填写 URLS 中的地址，不含 #名称）。
+	// 留空则默认使用 URLS 中的第一个。
+	BOT_PROXY: '',
 	// /ads.txt 返回内容。
 	// ADS: 'google.com, pub-9350003957494520, DIRECT, f08c47fec0942fa0',
 	// 网站图标，同时用于响应 /favicon.ico。
@@ -70,6 +73,17 @@ async function handleRequest(request, env = {}) {
 		});
 	}
 
+	// 搜索引擎爬虫：反代到 CDN 返回实际内容，保持 blog.isyyo.com 的 URL
+	const ua = request.headers.get('user-agent') || '';
+	if (isBot(ua)) {
+		const proxyOrigin = getProxyOrigin(config);
+		if (proxyOrigin) {
+			const proxyResponse = await proxyToCDN(request, proxyOrigin, path, params);
+			if (proxyResponse) return proxyResponse;
+			// 反代失败则回退到测速页面
+		}
+	}
+
 	const urls = toList(config.URLS);
 	const images = toList(config.IMG);
 	const img = images.length > 0
@@ -106,11 +120,64 @@ function corsHeaders() {
 	};
 }
 
+// 检测是否为搜索引擎爬虫
+function isBot(ua) {
+	return /bot|crawler|spider|crawling|googlebot|bingbot|yandexbot|baiduspider|duckduckbot|slurp|sogou|exabot|facebot|ia_archiver|linkedinbot|pinterestbot|twitterbot|discordbot|slackbot|whatsapp|facebookexternalhit|embedly|showyoubot|outbrain|pinterest|developers\.google\.com|bitlybot|skypeuripreview|nuzzel|quora|yahoo|semrush|mj12bot|ahrefsbot|dotbot|rogerbot|applebot|cloudflareworkers/i.test(ua);
+}
+
+// 获取反代目标 CDN 地址
+function getProxyOrigin(config) {
+	// 优先使用 BOT_PROXY 配置
+	if (config.BOT_PROXY) {
+		return config.BOT_PROXY.replace(/\/+$/, '');
+	}
+	// 默认使用 URLS 中的第一个
+	const urls = toList(config.URLS);
+	if (urls.length > 0) {
+		return urls[0].split('#')[0].replace(/\/+$/, '');
+	}
+	return '';
+}
+
+// 反代请求到 CDN，使用普通浏览器 UA 避免被安全策略拦截
+async function proxyToCDN(request, origin, path, params) {
+	const targetUrl = origin + path + params;
+
+	try {
+		const response = await fetch(targetUrl, {
+			method: 'GET',
+			headers: {
+				'User-Agent': 'Mozilla/5.0 (compatible; BlogCDNBot/1.0; +https://blog.isyyo.com)',
+				'Accept': request.headers.get('accept') || 'text/html',
+				'Accept-Language': request.headers.get('accept-language') || 'zh-CN,zh;q=0.9,en;q=0.8',
+				'Accept-Encoding': 'gzip, deflate, br',
+			},
+			redirect: 'follow',
+		});
+
+		// 构建响应头，透传 CDN 的 content-type 等头
+		const headers = new Headers();
+		const contentType = response.headers.get('content-type');
+		if (contentType) headers.set('content-type', contentType);
+		const contentEncoding = response.headers.get('content-encoding');
+		if (contentEncoding) headers.set('content-encoding', contentEncoding);
+
+		return new Response(response.body, {
+			status: response.status,
+			headers,
+		});
+	} catch (e) {
+		// 反代失败时回退到测速页面
+		return null;
+	}
+}
+
 function resolveConfig(env = {}) {
 	const jumpDelay = Number(getConfigValue(env, 'JUMP_DELAY', DEFAULT_CONFIG.JUMP_DELAY));
 
 	return {
 		URLS: getConfigValue(env, ['URLS', 'URL'], DEFAULT_CONFIG.URLS),
+		BOT_PROXY: getConfigValue(env, 'BOT_PROXY', DEFAULT_CONFIG.BOT_PROXY),
 		ADS: getConfigValue(env, 'ADS', DEFAULT_CONFIG.ADS),
 		ICO: getConfigValue(env, 'ICO', DEFAULT_CONFIG.ICO),
 		PNG: getConfigValue(env, 'PNG', DEFAULT_CONFIG.PNG),
