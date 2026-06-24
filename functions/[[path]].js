@@ -10,7 +10,7 @@ const DEFAULT_CONFIG = {
 	// 留空则默认使用 URLS 中的第一个。
 	BOT_PROXY: '',
 	// /ads.txt 返回内容。
-	// ADS: 'google.com, pub-9350003957494520, DIRECT, f08c47fec0942fa0',
+	// ADS: 'google.com, pub-xxxx, DIRECT, f08cxxxxc0942fa0',
 	// 网站图标，同时用于响应 /favicon.ico。
 	ICO: 'https://eo.blog.isyyo.com/favicon/icon.png',
 	// 页面中间显示的头像或 Logo。
